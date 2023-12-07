@@ -1,19 +1,22 @@
 library(tidyverse)
 
 input <- read_file("input05") %>%
-  str_split_1(":") %>%
+  str_split_1(":\\n?") %>%
   str_split("\\n") %>%
-  map(~ str_extract_all(., "\\d+") %>% unlist %>% as.numeric)
+  map(~ str_extract_all(., "\\d+") %>%
+        keep(~ length(.) != 0) %>%
+        map(as.numeric) %>%
+        do.call(what = rbind))
 
-seeds <- input[[2]]
+seeds <- input[[2]][1,]
 for (i in 3:length(input)) {
   new_seeds <- NULL
   for (s in seeds) {
     new_seed <- NULL
-    for (j in seq_len(length(input[[i]]) %/% 3)) {
-      dest <- input[[i]][1 + (j - 1) * 3]
-      src <- input[[i]][2 + (j - 1) * 3]
-      range <- input[[i]][3 + (j - 1) * 3]
+    for (j in seq_len(nrow(input[[i]]))) {
+      dest <- input[[i]][j,1]
+      src <- input[[i]][j,2]
+      range <- input[[i]][j,3]
       if (s >= src && s < src + range)
         new_seed <- s - src + dest
     }
@@ -34,10 +37,10 @@ for (i in 3:length(input)) {
     seeds_start <- seeds[k,1]
     seeds_range <- seeds[k,2]
     seeds_end <- sum(seeds_start + seeds_range - 1)
-    for (j in seq_len(length(input[[i]]) %/% 3)) {
-      dest <- input[[i]][1 + (j - 1) * 3]
-      start <- input[[i]][2 + (j - 1) * 3]
-      range <- input[[i]][3 + (j - 1) * 3]
+    for (j in seq_len(nrow(input[[i]]))) {
+      dest <- input[[i]][j,1]
+      start <- input[[i]][j,2]
+      range <- input[[i]][j,3]
       end <- start + range - 1
       if (start <= seeds_start && seeds_end <= end) {
         new_ranges <- rbind(new_ranges, c(seeds_start - start + dest, seeds_range))

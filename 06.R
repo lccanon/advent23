@@ -32,7 +32,6 @@ library(Rmpfr)
 delta <- time ^ 2 - 4 * distance
 delta <- delta %>%
   mpfr(log2(delta) + 10) %>%
-  sqrt %>%
-  as.integer
+  sqrt
 X <- (time + c(-1, 1) * delta) / 2
-print(diff(X) + 1)
+print(floor(X[2]) - ceiling(X[1]) + 1)

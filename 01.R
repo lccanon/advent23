@@ -1,7 +1,7 @@
 library(tidyverse)
 
 read_lines("input01") %>%
-  str_replace("(one|two|three|four|five|six|seven|eight|nine)", "\\1 ") %>%
+  str_replace("(one|two|three|four|five|six|seven|eight|nine)", "\\1 \\1") %>%
   str_replace("(.*)(one|two|three|four|five|six|seven|eight|nine)", "\\1\\2 ") %>%
   str_replace_all("one ", "1") %>%
   str_replace_all("two ", "2") %>%

@@ -42,6 +42,8 @@ compute_energy <- function(input, light) {
   sum(energy)
 }
 
+print(compute_energy(input, matrix(c(2, 1, 0, 1), nrow = 1)))
+
 max_energy <- 0
 for (ext in c(1, ncol(input))) {
   for (k in 2:(nrow(input) - 1)) {

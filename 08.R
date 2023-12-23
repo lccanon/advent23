@@ -1,4 +1,5 @@
 library(tidyverse)
+options(digits = 20)
 
 input <- read_lines("input08")
 
@@ -30,8 +31,7 @@ lcm_cycle <- function(ints, moves, inputs, exits) {
   res <- 1
   for (input in inputs)
     res <- LCM(res, cycle(ints, moves, input, exits) / length(ints))
-  library(gmp)
-  as.bigq(res) * length(ints)
+  res * length(ints)
 }
 
 inputs <- moves[str_sub_all(rownames(moves), start = 3) %>% unlist == "A",1]

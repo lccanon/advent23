@@ -1,4 +1,5 @@
 library(tidyverse)
+options(digits = 20)
 
 input <- read_lines("input12") %>%
   str_split(" ")
@@ -38,6 +39,4 @@ for (i in 1:length(input)) {
   CC <- cc[length(states),length(groups)]
   res <- res + CC
 }
-
-library(gmp)
-print(as.bigq(res))
+res

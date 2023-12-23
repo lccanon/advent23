@@ -1,10 +1,10 @@
 library(tidyverse)
-library(gmp)
+options(digits = 20)
 
 hold <- function(input) {
   x <- 0
   y <- 0
-  area <- as.bigq(0)
+  area <- 0
   for (i in 1:nrow(input)) {
     # RIGHT, DOWN, LEFT, RIGHT
     if (input[i,]$dir == 0)
@@ -52,5 +52,4 @@ input %>%
   mutate(x = cumsum(x * len), y = cumsum(y * len)) %>%
   mutate(area = x * y * ifelse(dir %% 2 == 0, -1, 1)) %>%
   summarise(area = sum(area) + sum(len) / 2 + 1) %>%
-  pull %>%
-  as.bigq
+  pull

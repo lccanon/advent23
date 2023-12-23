@@ -1,4 +1,5 @@
 library(tidyverse)
+options(digits = 20)
 
 input <- read_file("input19") %>%
   str_split_1("\\n\\n") %>%
@@ -91,8 +92,6 @@ interval <- function(W, curr, partial) {
 partial <- list()
 for (prop in c("x", "m", "a", "s"))
   partial[[prop]] <- c(1, 4000)
-library(gmp)
 interval(W, "in", partial) %>%
   sum %>%
-  as.bigq %>%
   print

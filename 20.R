@@ -1,4 +1,5 @@
 library(tidyverse)
+options(digits = 20)
 
 input <- read_lines("input20") %>%
   str_replace("([%&]?)([a-z]+) -> ", "\\1,\\2,") %>%
@@ -75,7 +76,6 @@ for (i_ in 1:1000000) {
   if (!is.null(cycle) && all(cycle != 0))
     break
 }
-library(gmp)
-print(as.bigq(low) * high)
+print(low * high)
 library(numbers)
-reduce(cycle, LCM) %>% as.bigq
+reduce(cycle, LCM)

@@ -11,22 +11,42 @@ for (i in 1:nrow(input)) {
   mat[blk[1]:blk[4],blk[2]:blk[5],blk[3]:blk[6]] <- i
 }
 
-idx <- sapply(1:dim(mat)[3], \(x) unique(unlist(mat[,,x]))) %>% unlist %>% unique
-idx <- idx[idx != 0]
-fall <- TRUE
-while (fall) {
-  fall <- FALSE
-  for (i in idx) {
-    blk <- input[i,] + 1
-    z <- which(mat[blk[1],blk[2],] == i)
-    while (min(z - 1) > 1 && all(mat[blk[1]:blk[4],blk[2]:blk[5],z - 1] %in% c(0, i))) {
-      z <- z - 1
-      fall <- TRUE
+count_fall <- function(input, mat, i = NULL) {
+  if (!is.null(i))
+    mat[mat == i] <- 0
+  idx <- sapply(1:dim(mat)[3], \(x) unique(unlist(mat[,,x]))) %>% unlist %>% unique
+  idx <- idx[idx != 0]
+  res <- 0
+  fall <- TRUE
+  while (fall) {
+    fall <- FALSE
+    for (id in idx) {
+      blk <- input[id,] + 1
+      z_init <- which(mat[blk[1],blk[2],] == id)
+      z <- z_init
+      while (min(z - 1) > 1 && all(mat[blk[1]:blk[4],blk[2]:blk[5],z - 1] %in% c(0, id))) {
+        z <- z - 1
+        fall <- TRUE
+      }
+      if (any(z != z_init))
+        res <- res + 1
+      mat[blk[1]:blk[4],blk[2]:blk[5],z_init] <- 0
+      mat[blk[1]:blk[4],blk[2]:blk[5],z] <- id
     }
-    mat[blk[1]:blk[4],blk[2]:blk[5],which(mat[blk[1],blk[2],] == i)] <- 0
-    mat[blk[1]:blk[4],blk[2]:blk[5],z] <- i
   }
+  list(mat = mat, fall = res)
 }
+
+mat <- count_fall(input, mat)$mat
+falls <- NULL
+for (i in 1:nrow(input)) {
+  print(i / nrow(input))
+  falls <- c(falls, count_fall(input, mat, i)$fall)
+}
+print(sum(falls == 0))
+print(sum(falls))
+
+# Part 1 more efficient alternative
 
 res <- 0
 for (i in 1:nrow(input)) {
@@ -50,39 +70,6 @@ for (i in 1:nrow(input)) {
 }
 print(res)
 
-# Part 2
-
-count_fall <- function(input, mat, i) {
-  mat[mat == i] <- 0
-  idx <- sapply(1:dim(mat)[3], \(x) unique(unlist(mat[,,x]))) %>% unlist %>% unique
-  idx <- idx[idx != 0]
-  res <- NULL
-  fall <- TRUE
-  while (fall) {
-    fall <- FALSE
-    for (id in idx) {
-      blk <- input[id,] + 1
-      z <- which(mat[blk[1],blk[2],] == id)
-      while (min(z - 1) > 1 && all(mat[blk[1]:blk[4],blk[2]:blk[5],z - 1] %in% c(0, id))) {
-        z <- z - 1
-        res <- c(res, id)
-        fall <- TRUE
-      }
-      mat[blk[1]:blk[4],blk[2]:blk[5],which(mat[blk[1],blk[2],] == id)] <- 0
-      mat[blk[1]:blk[4],blk[2]:blk[5],z] <- id
-    }
-  }
-  if (length(unique(res)) != critical[[i]]$falling)
-    print(c(i, length(unique(res)), critical[[i]]$falling))
-  unique(res)
-}
-res <- 0
-for (i in 1:nrow(input)) {
-  print(i / nrow(input))
-  res <- res + length(count_fall(input, mat, i))
-}
-print(res)
-
 # Part 2 more efficient alternative O(V + E)
 
 critical <- map(1:nrow(input), ~ list())
@@ -97,7 +84,7 @@ for (height in dim(mat)[3]:1) {
     z <- which(mat[blk[1],blk[2],] == i)
     above <- mat[blk[1]:blk[4],blk[2]:blk[5],z + 1]
     above <- unique(above[!above %in% c(0, i)])
-    # Merge critical nodes
+    # Merge critical nodes (unmoved parts)
     falling <- 1
     crit <- above
     cont <- TRUE

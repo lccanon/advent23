@@ -14,7 +14,7 @@ for (i in 1:nrow(input)) {
 count_fall <- function(input, mat, i = NULL) {
   if (!is.null(i))
     mat[mat == i] <- 0
-  idx <- sapply(1:dim(mat)[3], \(x) unique(unlist(mat[,,x]))) %>% unlist %>% unique
+  idx <- sapply(1:dim(mat)[3], \(x) unique(as.vector(mat[,,x]))) %>% unlist %>% unique
   idx <- idx[idx != 0]
   res <- 0
   fall <- TRUE
@@ -73,10 +73,9 @@ print(res)
 # Part 2 more efficient alternative O(V + E)
 
 critical <- map(1:nrow(input), ~ list())
-for (height in dim(mat)[3]:1) {
-  ids <- unique(unlist(mat[,,height]))
-  ids <- ids[ids != 0]
-  for (i in ids) {
+for (height in (dim(mat)[3] - 1):2) {
+  ids <- unique(as.vector(mat[,,height]))
+  for (i in ids[ids != 0]) {
     if (length(critical[[i]]) != 0)
       next
     # Get successors
@@ -108,3 +107,28 @@ for (height in dim(mat)[3]:1) {
   }
 }
 map_int(critical, ~ .$falling - 1) %>% sum
+
+# Part 2 alternative with dominator tree from igraph
+
+adj <- list()
+for (height in 2:(dim(mat)[3] - 1)) {
+  ids <- unique(as.vector(mat[,,height]))
+  for (i in ids[ids != 0]) {
+    # Get successors
+    blk <- input[i,] + 1
+    z <- which(mat[blk[1],blk[2],] == i)
+    above <- mat[blk[1]:blk[4],blk[2]:blk[5],z + 1]
+    above <- unique(above[!above %in% c(0, i)])
+    adj[[i]] <- above
+  }
+}
+base <- unique(as.vector(mat[,,2]))
+adj[[length(adj) + 1]] <- base[base != 0]
+
+library(igraph)
+domtree <- dominator_tree(graph_from_adj_list(adj), length(adj))$dom
+idx <- sapply(dim(mat)[3]:1, \(x) unique(as.vector(mat[,,x]))) %>% unlist %>% unique
+falling <- rep(1, length(adj))
+for (i in idx[idx != 0])
+  falling[domtree[i]] <- falling[domtree[i]] + falling[i]
+print(sum(falling) - tail(falling, 1) - nrow(input))

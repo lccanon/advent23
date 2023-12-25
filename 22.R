@@ -70,7 +70,9 @@ for (i in 1:nrow(input)) {
 }
 print(res)
 
-# Part 2 more efficient alternative O(V + E)
+# Part 2 more efficient alternative O(V + E) in time but with O(V^2) in space
+# (probably possible to reduce memory with a multiset, leading to O(V log V + E)
+# in time)
 
 critical <- map(1:nrow(input), ~ list())
 for (height in (dim(mat)[3] - 1):2) {
@@ -131,4 +133,4 @@ idx <- sapply(dim(mat)[3]:1, \(x) unique(as.vector(mat[,,x]))) %>% unlist %>% un
 falling <- rep(1, length(adj))
 for (i in idx[idx != 0])
   falling[domtree[i]] <- falling[domtree[i]] + falling[i]
-print(sum(falling) - tail(falling, 1) - nrow(input))
+print(sum(head(falling - 1, -1)))
